@@ -44,6 +44,7 @@
 
       connectedCallback() {
         super.connectedCallback();
+        let _this = this;
         this.addEventListener('blur', (e) => {
           _this.dropdownOpened = false;
         });

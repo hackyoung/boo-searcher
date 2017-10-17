@@ -111,9 +111,6 @@
           }
           _this.dropdownOpened = false;
         });
-        this.addEventListener('blur', (e) => {
-          _this.dropdownOpened = false;
-        });
       }
 
       useResult(result) {
@@ -128,10 +125,11 @@
         this.dropdownOpened = true;
         let input = this.shadowRoot.querySelector('input');
         let keyword = input.value.trim();
+        this.result = [];
         if (keyword == '') {
           this.dropdownOpened = false;
           this.loading = false;
-          this.result = [];
+          return;
         }
         return fetch(this.request.call(this, keyword));
       }
