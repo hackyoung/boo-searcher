@@ -1,6 +1,4 @@
 <link rel="import" href="../polymer/polymer-element.html">
-<link rel="import" href="../paper-listbox/paper-listbox.html">
-<link rel="import" href="../paper-item/paper-item.html">
 <link rel="import" href="../paper-spinner/paper-spinner.html">
 <link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
 
@@ -36,22 +34,13 @@
     </style>
     <input type="text" />
 
-    <array-selector
-      id="selector"
-      items="{{result}}"
-      selected-item="{{selectedItem}}"></array-selector>
-
     <template is="dom-if" if="[[dropdownOpened]]">
       <div>
         <template is="dom-if" if="[[loading]]">
           <paper-spinner active=[[loading]]></paper-spinner>
         </template>
         <template is="dom-if" if="[[!loading]]">
-          <paper-listbox>
-            <template is="dom-repeat" items=[[result]] as="item">
-              <paper-item>[[item]]</paper-item>
-            </template>
-          </paper-listbox>
+          <slot></slot>
         </template>
       </div>
     </template>
@@ -71,8 +60,6 @@
       static get is() { return 'boo-searcher'; }
       static get properties() {
         return {
-
-          // 展示结果的最大条数
           maxItems: {
             type: Number,
             value: 8
@@ -81,22 +68,16 @@
             type: Number,
             value: 500
           },
-
           loading: {
             type: Boolean,
             value: false
           },
-
           result: {
             type: Array,
             notify: true
           },
           responseHandler: Function,
           request: Function,
-          requestUrl: {
-            type: String,
-            value: '/data/result.json'
-          },
           dropdownOpened: {
             type: Boolean,
             value: false
