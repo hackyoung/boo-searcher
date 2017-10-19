@@ -4,6 +4,7 @@
   "dependencies": {
     "polymer": "Polymer/polymer#^2.0.0",
     "paper-listbox" : "PolymerElements/paper-listbox#latest",
+    "paper-item" : "PolymerElements/paper-item#latest",
     "paper-spinner" : "PolymerElements/paper-spinner#latest",
     "neon-animation" : "PolymerElements/neon-animation.html#latest",
     "iron-dropdown" : "PolymerElements/iron-dropdown#latest",
