@@ -24,6 +24,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       input {
         @apply --boo-searcher-input;
       }
+      input:focus {
+        @apply --boo-searcher-input-focus;
+      }
       
       div {
         box-shadow: 1px 2px 5px rgba(0, 0, 0, .4);
@@ -32,8 +35,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         text-align: center;
         @apply --boo-searcher-result-container;
       }
-      
-      
+
       paper-spinner {
         margin-left: auto;
         margin-right: auto;
@@ -84,7 +86,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         return {
           verticalAlign: String,
           horizontalAlign: String,
-          dropdownOpened: Boolean,
+          dropdownOpened: {
+            type: Boolean,
+            observer: '_dropdownOpenedChanged'
+          },
           disabled: Boolean,
           scrollAction: String,
           horizontalOffset: Number,
@@ -165,10 +170,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if (!this.request) {
           this.request = this._generateRequest;
         }
-        let _this = this;
-        setTimeout(() => {
-          _this.resetLayout();
-        }, 100);
       }
 
       resetLayout() {
@@ -238,6 +239,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _resultChanged(result) {
         this.dropdownOpened = this.loading || (result.length != 0);
+      }
+
+      _dropdownOpenedChanged(opened) {
+        opened && this.resetLayout();
       }
     }
 
