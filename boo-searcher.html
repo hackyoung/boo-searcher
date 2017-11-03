@@ -146,7 +146,13 @@
       _request() {
         this.dropdownOpened = true;
         let input = this.shadowRoot.querySelector('input');
-        return fetch(this.request.call(this, input.value));
+        let keyword = input.value.trim();
+        if (keyword == '') {
+          this.dropdownOpened = false;
+          this.loading = false;
+          this.result = [];
+        }
+        return fetch(this.request.call(this, keyword));
       }
 
       _generateRequest(keyword) {
