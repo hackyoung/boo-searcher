@@ -1,0 +1,165 @@
+<link rel="import" href="../polymer/polymer-element.html">
+<link rel="import" href="../paper-listbox/paper-listbox.html">
+<link rel="import" href="../paper-item/paper-item.html">
+<link rel="import" href="../paper-spinner/paper-spinner.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
+
+<dom-module id="boo-searcher">
+  <template>
+    <style>
+      :host {
+        display: inline-block;
+        position: relative;
+      }
+
+      input {
+        @apply --boo-searcher-input;
+      }
+
+      div {
+        box-shadow: 1px 2px 5px rgba(0, 0, 0, .4);
+        width: 100%;
+        z-index: 1000;
+        background-color: white;
+        text-align: center;
+        @apply --boo-searcher-result-container;
+        position: absolute;
+      }
+
+      paper-spinner {
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 40px;
+        margin-bottom: 40px;
+      }
+
+    </style>
+    <input type="text" />
+
+    <array-selector
+      id="selector"
+      items="{{result}}"
+      selected-item="{{selectedItem}}"></array-selector>
+
+    <template is="dom-if" if="[[dropdownOpened]]">
+      <div>
+        <template is="dom-if" if="[[loading]]">
+          <paper-spinner active=[[loading]]></paper-spinner>
+        </template>
+        <template is="dom-if" if="[[!loading]]">
+          <paper-listbox>
+            <template is="dom-repeat" items=[[result]] as="item">
+              <paper-item>[[item]]</paper-item>
+            </template>
+          </paper-listbox>
+        </template>
+      </div>
+    </template>
+
+  </template>
+
+  <script>
+    /**
+     * `boo-searcher`
+     * 
+     *
+     * @customElement
+     * @polymer
+     * @demo demo/index.html
+     */
+    class BooSearcher extends Polymer.Element {
+      static get is() { return 'boo-searcher'; }
+      static get properties() {
+        return {
+
+          // 展示结果的最大条数
+          maxItems: {
+            type: Number,
+            value: 8
+          },
+          interval: {
+            type: Number,
+            value: 500
+          },
+
+          loading: {
+            type: Boolean,
+            value: false
+          },
+
+          result: {
+            type: Array,
+            notify: true
+          },
+          responseHandler: Function,
+          request: Function,
+          requestUrl: {
+            type: String,
+            value: '/data/result.json'
+          },
+          dropdownOpened: {
+            type: Boolean,
+            value: false
+          }
+        };
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        if (!this.responseHandler) {
+          this.responseHandler = this._response;
+        }
+        if (!this.request) {
+          this.request = this._generateRequest;
+        }
+        let input = this.shadowRoot.querySelector('input');
+        let timer = null;
+        let _this = this;
+        input.addEventListener('input', (e) => {
+          clearTimeout(timer);
+          timer = setTimeout(() => {
+            _this.loading = true;
+            _this._request()
+              .then(_this.responseHandler.bind(_this))
+              .then(_this.useResult.bind(_this));
+          }, _this.interval);
+        });
+        this.addEventListener('focus', (e) => {
+          if (_this.loading || _this.result) {
+            return _this.dropdownOpened = true;
+          }
+          _this.dropdownOpened = false;
+        });
+        this.addEventListener('blur', (e) => {
+          _this.dropdownOpened = false;
+        });
+      }
+
+      useResult(result) {
+        this.loading = false;
+        if (result.length > this.maxItems) {
+          result = result.splice(0, this.maxItems);
+        }
+        this.result = result;
+      }
+
+      _request() {
+        this.dropdownOpened = true;
+        let input = this.shadowRoot.querySelector('input');
+        return fetch(this.request.call(this, input.value));
+      }
+
+      _generateRequest(keyword) {
+        return new Request(`/data/result.json?keyword=${keyword}`);
+      }
+
+      _response(response) {
+        return new Promise((resolved, reject) => {
+          resolved(response.json());
+        });
+      }
+    }
+
+    window.customElements.define(BooSearcher.is, BooSearcher);
+  </script>
+</dom-module>
