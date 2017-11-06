@@ -10,7 +10,7 @@
       interval={{inteval}}
       result={{result}}
       loading={{loading}}
-      dropdownOpened={{dropdownOpened}}
+      dropdown-opened={{dropdownOpened}}
       request=[[request]]>
       <paper-listbox>
         <template is="dom-repeat" items=[[result]] as="item">
@@ -38,7 +38,10 @@
           selected: {
             notify: true
           },
-          dropdownOpened: Boolean
+          dropdownOpened: {
+              type: Boolean,
+              notify: true
+          }
         };
       }
 
@@ -50,9 +53,9 @@
         });
       }
       _selectItem(e) {
-        let list = this.shadowRoot.querySelector('template');
-        let selector = this.shadowRoot.querySelector('array-selector');
-        selector.select(list.itemForElement(e.target));
+        // let list = this.shadowRoot.querySelector('template');
+        // let selector = this.shadowRoot.querySelector('array-selector');
+        // selector.select(list.itemForElement(e.target));
         this.dispatchEvent(new CustomEvent('select-item'));
       }
     }

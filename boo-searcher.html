@@ -14,7 +14,7 @@
         @apply --boo-searcher-input;
       }
 
-      iron-dropdown {
+      div {
         box-shadow: 1px 2px 5px rgba(0, 0, 0, .4);
         min-width: 100%;
         z-index: 1000;
@@ -41,12 +41,13 @@
         <template is="dom-if" if="[[!loading]]">
           <slot></slot>
         </template>
-      </iron-dropdown>
+      </div>
     </template>
 
   </template>
 
   <script>
+
     /**
      * `boo-searcher`
      * 
@@ -84,7 +85,7 @@
           dropdownOpened: {
             type: Boolean,
             value: false
-          }
+          },
         };
       }
 
@@ -145,12 +146,6 @@
         return new Promise((resolved, reject) => {
           resolved(response.json());
         });
-      }
-
-      _select(e) {
-        let itemList = this.shadowRoot.querySelector('#result-items');
-        let selector = this.shadowRoot.querySelector('#selector');
-        selector.select(itemList.itemForElement(e.target));
       }
     }
 
