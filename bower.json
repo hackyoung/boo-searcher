@@ -5,7 +5,9 @@
     "polymer": "Polymer/polymer#^2.0.0",
     "paper-listbox" : "PolymerElements/paper-listbox#latest",
     "paper-spinner" : "PolymerElements/paper-spinner#latest",
+    "paper-menu-button" : "PolymerElements/paper-menu-button#latest",
     "iron-flex-layout" : "PolymerElements/iron-flex-layout#latest",
+    "neon-animation" : "PolymerElements/neon-animation.html#latest",
     "paper-item" : "PolymerElements/paper-item#latest"
   },
   "devDependencies": {

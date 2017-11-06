@@ -12,7 +12,7 @@
       loading={{loading}}
       dropdown-opened={{dropdownOpened}}
       request=[[request]]>
-      <paper-listbox>
+      <paper-listbox slot="dropdown-content">
         <template is="dom-repeat" items=[[result]] as="item">
           <paper-item on-click="_selectItem">[[item]]</paper-item>
         </template>

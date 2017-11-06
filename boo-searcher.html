@@ -1,6 +1,10 @@
 <link rel="import" href="../polymer/polymer-element.html">
 <link rel="import" href="../paper-spinner/paper-spinner.html">
 <link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../iron-dropdown/iron-dropdown.html">
+<link rel="import" href="../neon-animation/animations/fade-in-animation.html">
+<link rel="import" href="../neon-animation/animations/fade-out-animation.html">
+<link rel="import" href="boo-searcher-animations.html">
 
 <dom-module id="boo-searcher">
   <template>
@@ -13,17 +17,16 @@
       input {
         @apply --boo-searcher-input;
       }
-
+      
       div {
         box-shadow: 1px 2px 5px rgba(0, 0, 0, .4);
-        min-width: 100%;
         z-index: 1000;
         background-color: white;
         text-align: center;
         @apply --boo-searcher-result-container;
-        position: absolute;
       }
-
+      
+      
       paper-spinner {
         margin-left: auto;
         margin-right: auto;
@@ -33,20 +36,41 @@
 
     </style>
     <input type="text" />
-    <template is="dom-if" if="[[dropdownOpened]]">
-      <div>
+
+    <iron-dropdown
+      horizontal-align="[[horizontalAlign]]"
+      vertical-align="[[verticalAlign]]"
+      dynamic-align="[[dynamicAlign]]"
+      horizontal-offset="[[horizontalOffset]]"
+      vertical-offset="[[verticalOffset]]"
+      no-overlap="[[noOverlap]]"
+      open-animation-config="[[openAnimationConfig]]"
+      close-animation-config="[[closeAnimationConfig]]"
+      no-animations="[[noAnimations]]"
+      focus-target="[[_dropdownContent]]"
+      allow-outside-scroll="[[allowOutsideScroll]]"
+      restore-focus-on-close="[[restoreFocusOnClose]]"
+      opened={{dropdownOpened}}>
+
+      <div slot="dropdown-content">
         <template is="dom-if" if="[[loading]]">
           <paper-spinner active=[[loading]]></paper-spinner>
         </template>
         <template is="dom-if" if="[[!loading]]">
-          <slot></slot>
+          <slot name="dropdown-content"></slot>
         </template>
       </div>
-    </template>
+
+    </iron-dropdown>
 
   </template>
 
   <script>
+
+    var config = {
+      ANIMATION_CUBIC_BEZIER: 'cubic-bezier(.3,.95,.5,1)',
+      MAX_ANIMATION_TIME_MS: 400
+    };
 
     /**
      * `boo-searcher`
@@ -60,31 +84,106 @@
       static get is() { return 'boo-searcher'; }
       static get properties() {
         return {
-          maxItems: {
-            type: Number,
-            value: 8
+          maxItems: { type: Number, value: 8 },
+          interval: { type: Number, value: 500 },
+          loading: { type: Boolean, value: false },
+          result: { type: Array, notify: true },
+          horizontalAlign: {
+            type: String,
+            value: "left",
+            reflectToAttribute: true
           },
-          interval: {
-            type: Number,
-            value: 500
+          verticalAlign : {
+            type: String,
+            value: "top",
+            reflectToAttribute: true
           },
-          loading: {
+          dynamicAlign: {
+            type: Boolean
+          },
+          horizontalOffset: {
+            type: Number,
+            value: 0,
+            notify: true,
+          },
+          verticalOffset: {
+            type: Number,
+            value: 0,
+            notify: true
+          },
+          noAnimations: {
             type: Boolean,
             value: false
           },
-          result: {
-            type: Array,
-            notify: true
+          ignoreSelect: {
+            type: Boolean,
+            value: false
           },
-          selected: {
+          closeOnActivate: {
+            type: Boolean,
+            value: false
+          },
+          allowOutsideScroll: {
+            type: Boolean,
+            value: false
+          },
+          closeAnimationConfig: {
             type: Object,
-            notify: true
+            value: function() {
+              return [{
+                name: 'fade-out-animation',
+                timing: {
+                  duration: 150
+                }
+              }, {
+                name: 'boo-searcher-shrink-width-animation',
+                timing: {
+                  delay: 100,
+                  duration: 50,
+                  easing: config.ANIMATION_CUBIC_BEZIER
+                }
+              }, {
+                name: 'boo-searcher-shrink-height-animation',
+                timing: {
+                  duration: 200,
+                  easing: 'ease-in'
+                }
+              }];
+            }
           },
+          openAnimationConfig: {
+            type: Object,
+            value: function() {
+              return [{
+                name: 'fade-in-animation',
+                timing: {
+                  delay: 100,
+                  duration: 200
+                }
+              }, {
+                name: 'boo-searcher-grow-width-animation',
+                timing: {
+                  delay: 100,
+                  duration: 150,
+                  easing: config.ANIMATION_CUBIC_BEZIER
+                }
+              }, {
+                name: 'boo-searcher-grow-height-animation',
+                timing: {
+                  delay: 100,
+                  duration: 275,
+                  easing: config.ANIMATION_CUBIC_BEZIER
+                }
+              }];
+            }
+          },
+          selected: { type: Object, notify: true },
           responseHandler: Function,
           request: Function,
           dropdownOpened: {
             type: Boolean,
-            value: false
+            value: false,
+            observer: '_dropdownOpenedChanged'
           },
         };
       }
