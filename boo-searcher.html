@@ -42,7 +42,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
 
-    <input type="text" on-input="_input" on-focus="_focus" />
+    <input type="text" on-input="_input" on-click="_focus" />
 
     <iron-dropdown id="dropdown"
       opened={{dropdownOpened}}
@@ -202,6 +202,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           return; 
         }
         this.dropdownOpened = true;
+        e.stopPropagation();
       }
 
       _request() {

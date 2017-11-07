@@ -5,7 +5,6 @@
     "polymer": "Polymer/polymer#^2.0.0",
     "paper-listbox" : "PolymerElements/paper-listbox#latest",
     "paper-spinner" : "PolymerElements/paper-spinner#latest",
-    "iron-flex-layout" : "PolymerElements/iron-flex-layout#latest",
     "neon-animation" : "PolymerElements/neon-animation.html#latest",
     "iron-dropdown" : "PolymerElements/iron-dropdown#latest",
     "iron-behaviors": "PolymerElements/iron-behaviors#1 - 2",
