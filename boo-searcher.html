@@ -141,7 +141,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           loading: {
             type: Boolean,
             value: false,
-            obserser: '_loadingChanged'
+            observer: '_loadingChanged'
           },
           result: {
             type: Array,
@@ -189,11 +189,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         clearTimeout(this._timer);
         this._timer = setTimeout(() => {
           _this.loading = true;
-          let response = _this._request();
-          if (response) {
-            response.then(_this.responseHandler.bind(_this))
-            .then(_this._useResult.bind(_this));
-          }
+          _this.result = [];
+          setTimeout(() => {
+            let response = _this._request();
+            if (response) {
+              response.then(_this.responseHandler.bind(_this))
+              .then(_this._useResult.bind(_this));
+            }
+          }, 400);
         }, _this.interval);
       }
 
@@ -209,7 +212,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _request() {
         let input = this.shadowRoot.querySelector('input');
         let keyword = input.value.trim();
-        this.result = [];
         if (keyword == '') {
           this.loading = false;
           return;
@@ -228,11 +230,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       _loadingChanged(loading) {
-        this.dropdownOpened = loading;
+        this.dropdownOpened = loading || (this.result && this.result.length != 0);
       }
 
       _resultChanged(result) {
-        this.dropdownOpened = (result.length != 0);
+        this.dropdownOpened = this.loading || (result.length != 0);
       }
     }
 
