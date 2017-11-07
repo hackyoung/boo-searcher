@@ -12,6 +12,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../iron-dropdown/iron-dropdown.html">
 <link rel="import" href="../neon-animation/neon-animations.html">
 <link rel="import" href="grow-height-animation.html">
+<link rel="import" href="../paper-spinner/paper-spinner.html">
 <link rel="import" href="../../bower_components/neon-animation/web-animations.html">
 
 <dom-module id="boo-searcher">
@@ -19,14 +20,32 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <style>
       :host {
         display: inline-block;
-        margin: 1em;
+      }
+      input {
+        @apply --boo-searcher-input;
+      }
+      
+      div {
+        box-shadow: 1px 2px 5px rgba(0, 0, 0, .4);
+        z-index: 1000;
+        background-color: white;
+        text-align: center;
+        @apply --boo-searcher-result-container;
+      }
+      
+      
+      paper-spinner {
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 40px;
+        margin-bottom: 40px;
       }
     </style>
 
-    <input type="text" on-input="input" />
+    <input type="text" on-input="_input" on-focus="_focus" />
 
     <iron-dropdown id="dropdown"
-      opened={{opened}}
+      opened={{dropdownOpened}}
       vertical-align="[[verticalAlign]]"
       horizontal-align="[[horizontalAlign]]"
       vertical-offset="[[verticalOffset]]"
@@ -35,26 +54,37 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       scroll-action="[[scrollAction]]"
       open-animation-config="[[openAnimationConfig]]"
       close-animation-config="[[closeAnimationConfig]]">
-      <slot name="dropdown-content" slot="dropdown-content"></slot>
+
+      <div id="content-wrapper" slot="dropdown-content">
+        <template is="dom-if" if="[[loading]]">
+          <paper-spinner active=[[loading]]></paper-spinner>
+        </template>
+        <template is="dom-if" if="[[!loading]]">
+          <slot></slot>
+        </template>
+      </div>
+
     </iron-dropdown>
 
   </template>
   <script>
   (() => {
+
     var config = {
       ANIMATION_CUBIC_BEZIER: 'cubic-bezier(.3,.95,.5,1)',
       MAX_ANIMATION_TIME_MS: 400
     };
+
     class BooSearcher extends Polymer.Element {
       static get is() { return 'boo-searcher'; }
       static get properties() {
         return {
           verticalAlign: String,
           horizontalAlign: String,
-          opened: Boolean,
+          dropdownOpened: Boolean,
           disabled: Boolean,
           scrollAction: String,
-          HorizontalOffset: Number,
+          horizontalOffset: Number,
           verticalOffset: Number,
           openAnimationConfig: {
             type: Array,
@@ -105,12 +135,102 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 }
               }];
             }
-          }
+          },
+          maxItems: { type: Number, value: 8 },
+          interval: { type: Number, value: 500 },
+          loading: {
+            type: Boolean,
+            value: false,
+            obserser: '_loadingChanged'
+          },
+          result: {
+            type: Array,
+            notify: true,
+            observer: '_resultChanged'
+          },
+          responseHandler: Function,
+          request: Function,
+          _timer : Object,
         };
       }
 
-      open() {
-        this.shadowRoot.querySelector('iron-dropdown').open();
+      connectedCallback() {
+        super.connectedCallback();
+        if (!this.responseHandler) {
+          this.responseHandler = this._response;
+        }
+        if (!this.request) {
+          this.request = this._generateRequest;
+        }
+        let _this = this;
+        setTimeout(() => {
+          _this.resetLayout();
+        }, 100);
+      }
+
+      resetLayout() {
+        let input = this.shadowRoot.querySelector('input');
+        let rect = input.getBoundingClientRect();
+        this.verticalOffset = rect.height;
+        let contentWrapper = this.shadowRoot.querySelector('#content-wrapper');
+        contentWrapper.style.minWidth = rect.width + 'px';
+      }
+
+      _useResult(result) {
+        this.loading = false;
+        if (result.length > this.maxItems) {
+          result = result.splice(0, this.maxItems);
+        }
+        this.result = result;
+      }
+
+      _input(e) {
+        let _this = this;
+        clearTimeout(this._timer);
+        this._timer = setTimeout(() => {
+          _this.loading = true;
+          let response = _this._request();
+          if (response) {
+            response.then(_this.responseHandler.bind(_this))
+            .then(_this._useResult.bind(_this));
+          }
+        }, _this.interval);
+      }
+
+      _focus(e) {
+        if (this.dropdownOpened == true || !this.loading && !this.result) {
+          return; 
+        }
+        this.dropdownOpened = true;
+      }
+
+      _request() {
+        let input = this.shadowRoot.querySelector('input');
+        let keyword = input.value.trim();
+        this.result = [];
+        if (keyword == '') {
+          this.loading = false;
+          return;
+        }
+        return fetch(this.request.call(this, keyword));
+      }
+
+      _generateRequest(keyword) {
+        return new Request(`/data/result.json?keyword=${keyword}`);
+      }
+
+      _response(response) {
+        return new Promise((resolved, reject) => {
+          resolved(response.json());
+        });
+      }
+
+      _loadingChanged(loading) {
+        this.dropdownOpened = loading;
+      }
+
+      _resultChanged(result) {
+        this.dropdownOpened = (result.length != 0);
       }
     }
 

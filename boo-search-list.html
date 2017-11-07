@@ -1,0 +1,65 @@
+<link rel="import" href="../polymer/polymer-element.html">
+<link rel="import" href="./boo-searcher.html">
+<link rel="import" href="../paper-listbox/paper-listbox.html">
+<link rel="import" href="../paper-item/paper-item.html">
+
+<dom-module id="boo-search-list">
+  <template>
+
+    <boo-searcher
+      interval={{inteval}}
+      result={{result}}
+      loading={{loading}}
+      dropdown-opened={{dropdownOpened}}
+      request=[[request]]>
+
+      <paper-listbox>
+        <template is="dom-repeat" items=[[result]] as="item">
+          <paper-item on-click="_selectItem">[[item]]</paper-item>
+        </template>
+      </paper-listbox>
+
+    </boo-searcher>
+
+    <array-selector
+      id="selector"
+      items="{{result}}"
+      selected="{{selected}}"></array-selector>
+
+  </template>
+  <script>
+    class BooSearchList extends Polymer.Element {
+      static get is() { return "boo-search-list"; } 
+      static get properties() {
+        return {
+          maxItems: Number,
+          inteval: Number,
+          result: Array,
+          loading: Boolean,
+          request: Function,
+          selected: {
+            notify: true
+          },
+          dropdownOpened: {
+              type: Boolean,
+              notify: true
+          }
+        };
+      }
+      connectedCallback() {
+        super.connectedCallback();
+        let _this = this;
+        this.addEventListener('blur', (e) => {
+          _this.dropdownOpened = false;
+        });
+      }
+      _selectItem(e) {
+        // let list = this.shadowRoot.querySelector('template');
+        // let selector = this.shadowRoot.querySelector('array-selector');
+        // selector.select(list.itemForElement(e.target));
+        this.dispatchEvent(new CustomEvent('select-item'));
+      }
+    }
+    window.customElements.define(BooSearchList.is, BooSearchList);
+  </script>
+</dom-module>
