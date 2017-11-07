@@ -23,7 +23,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
 
-    <input type="text" />
+    <input type="text" on-input="input" />
 
     <iron-dropdown id="dropdown"
       opened={{opened}}
@@ -37,6 +37,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       close-animation-config="[[closeAnimationConfig]]">
       <slot name="dropdown-content" slot="dropdown-content"></slot>
     </iron-dropdown>
+
   </template>
   <script>
   (() => {
