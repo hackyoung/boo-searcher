@@ -42,7 +42,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
 
-    <input type="text" on-input="_input" on-click="_focus" />
+    <input type="text"
+      disabled="[[disabled]]"
+      on-input="_input"
+      on-click="_focus" />
 
     <iron-dropdown id="dropdown"
       opened={{dropdownOpened}}
