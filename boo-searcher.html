@@ -198,7 +198,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       _focus(e) {
-        if (this.dropdownOpened == true || !this.loading && !this.result) {
+        if (!this.loading && !(this.result.length == 0)) {
           return; 
         }
         this.dropdownOpened = true;
