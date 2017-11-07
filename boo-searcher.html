@@ -1,158 +1,62 @@
-<link rel="import" href="../polymer/polymer-element.html">
-<link rel="import" href="../paper-spinner/paper-spinner.html">
-<link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../iron-dropdown/iron-dropdown.html">
-<link rel="import" href="../neon-animation/animations/fade-in-animation.html">
-<link rel="import" href="../neon-animation/animations/fade-out-animation.html">
-<link rel="import" href="boo-searcher-animations.html">
+<link rel="import" href="../neon-animation/neon-animations.html">
+<link rel="import" href="grow-height-animation.html">
+<link rel="import" href="../../bower_components/neon-animation/web-animations.html">
 
 <dom-module id="boo-searcher">
   <template>
     <style>
       :host {
         display: inline-block;
-        position: relative;
+        margin: 1em;
       }
-
-      input {
-        @apply --boo-searcher-input;
-      }
-      
-      div {
-        box-shadow: 1px 2px 5px rgba(0, 0, 0, .4);
-        z-index: 1000;
-        background-color: white;
-        text-align: center;
-        @apply --boo-searcher-result-container;
-      }
-      
-      
-      paper-spinner {
-        margin-left: auto;
-        margin-right: auto;
-        margin-top: 40px;
-        margin-bottom: 40px;
-      }
-
     </style>
+
     <input type="text" />
 
-    <iron-dropdown
-      horizontal-align="[[horizontalAlign]]"
+    <iron-dropdown id="dropdown"
+      opened={{opened}}
       vertical-align="[[verticalAlign]]"
-      dynamic-align="[[dynamicAlign]]"
-      horizontal-offset="[[horizontalOffset]]"
+      horizontal-align="[[horizontalAlign]]"
       vertical-offset="[[verticalOffset]]"
-      no-overlap="[[noOverlap]]"
+      horizontal-offset="[[HorizontalOffset]]"
+      disabled="[[disabled]]"
+      scroll-action="[[scrollAction]]"
       open-animation-config="[[openAnimationConfig]]"
-      close-animation-config="[[closeAnimationConfig]]"
-      no-animations="[[noAnimations]]"
-      focus-target="[[_dropdownContent]]"
-      allow-outside-scroll="[[allowOutsideScroll]]"
-      restore-focus-on-close="[[restoreFocusOnClose]]"
-      opened={{dropdownOpened}}>
-
-      <div slot="dropdown-content">
-        <template is="dom-if" if="[[loading]]">
-          <paper-spinner active=[[loading]]></paper-spinner>
-        </template>
-        <template is="dom-if" if="[[!loading]]">
-          <slot name="dropdown-content"></slot>
-        </template>
-      </div>
-
+      close-animation-config="[[closeAnimationConfig]]">
+      <slot name="dropdown-content" slot="dropdown-content"></slot>
     </iron-dropdown>
-
   </template>
-
   <script>
-
+  (() => {
     var config = {
       ANIMATION_CUBIC_BEZIER: 'cubic-bezier(.3,.95,.5,1)',
       MAX_ANIMATION_TIME_MS: 400
     };
-
-    /**
-     * `boo-searcher`
-     * 
-     *
-     * @customElement
-     * @polymer
-     * @demo demo/index.html
-     */
     class BooSearcher extends Polymer.Element {
       static get is() { return 'boo-searcher'; }
       static get properties() {
         return {
-          maxItems: { type: Number, value: 8 },
-          interval: { type: Number, value: 500 },
-          loading: { type: Boolean, value: false },
-          result: { type: Array, notify: true },
-          horizontalAlign: {
-            type: String,
-            value: "left",
-            reflectToAttribute: true
-          },
-          verticalAlign : {
-            type: String,
-            value: "top",
-            reflectToAttribute: true
-          },
-          dynamicAlign: {
-            type: Boolean
-          },
-          horizontalOffset: {
-            type: Number,
-            value: 0,
-            notify: true,
-          },
-          verticalOffset: {
-            type: Number,
-            value: 20,
-            notify: true
-          },
-          noAnimations: {
-            type: Boolean,
-            value: false
-          },
-          ignoreSelect: {
-            type: Boolean,
-            value: false
-          },
-          closeOnActivate: {
-            type: Boolean,
-            value: false
-          },
-          allowOutsideScroll: {
-            type: Boolean,
-            value: false
-          },
-          closeAnimationConfig: {
-            type: Object,
-            value: function() {
-              return [{
-                name: 'fade-out-animation',
-                timing: {
-                  duration: 150
-                }
-              }, {
-                name: 'boo-searcher-shrink-width-animation',
-                timing: {
-                  delay: 100,
-                  duration: 50,
-                  easing: config.ANIMATION_CUBIC_BEZIER
-                }
-              }, {
-                name: 'boo-searcher-shrink-height-animation',
-                timing: {
-                  duration: 200,
-                  easing: 'ease-in'
-                }
-              }];
-            }
-          },
+          verticalAlign: String,
+          horizontalAlign: String,
+          opened: Boolean,
+          disabled: Boolean,
+          scrollAction: String,
+          HorizontalOffset: Number,
+          verticalOffset: Number,
           openAnimationConfig: {
-            type: Object,
+            type: Array,
             value: function() {
               return [{
                 name: 'fade-in-animation',
@@ -161,14 +65,14 @@
                   duration: 200
                 }
               }, {
-                name: 'boo-searcher-grow-width-animation',
+                name: 'search-dropdown-grow-width-animation',
                 timing: {
                   delay: 100,
                   duration: 150,
                   easing: config.ANIMATION_CUBIC_BEZIER
                 }
               }, {
-                name: 'boo-searcher-grow-height-animation',
+                name: 'search-dropdown-grow-height-animation',
                 timing: {
                   delay: 100,
                   duration: 275,
@@ -177,77 +81,39 @@
               }];
             }
           },
-          selected: { type: Object, notify: true },
-          responseHandler: Function,
-          request: Function,
-          dropdownOpened: {
-            type: Boolean,
-            value: false,
-            observer: '_dropdownOpenedChanged'
-          },
+          closeAnimationConfig: {
+            type: Array,
+            value: function() {
+              return [{
+                name: 'fade-out-animation',
+                timing: {
+                  duration: 150
+                }
+              }, {
+                name: 'search-dropdown-shrink-width-animation',
+                timing: {
+                  delay: 100,
+                  duration: 50,
+                  easing: config.ANIMATION_CUBIC_BEZIER
+                }
+              }, {
+                name: 'search-dropdown-shrink-height-animation',
+                timing: {
+                  duration: 200,
+                  easing: 'ease-in'
+                }
+              }];
+            }
+          }
         };
       }
 
-      connectedCallback() {
-        super.connectedCallback();
-        if (!this.responseHandler) {
-          this.responseHandler = this._response;
-        }
-        if (!this.request) {
-          this.request = this._generateRequest;
-        }
-        let input = this.shadowRoot.querySelector('input');
-        let timer = null;
-        let _this = this;
-        input.addEventListener('input', (e) => {
-          clearTimeout(timer);
-          timer = setTimeout(() => {
-            _this.loading = true;
-            _this._request()
-              .then(_this.responseHandler.bind(_this))
-              .then(_this.useResult.bind(_this));
-          }, _this.interval);
-        });
-        this.addEventListener('focus', (e) => {
-          if (_this.loading || _this.result) {
-            return _this.dropdownOpened = true;
-          }
-          _this.dropdownOpened = false;
-        });
-      }
-
-      useResult(result) {
-        this.loading = false;
-        if (result.length > this.maxItems) {
-          result = result.splice(0, this.maxItems);
-        }
-        this.result = result;
-      }
-
-      _request() {
-        this.dropdownOpened = true;
-        let input = this.shadowRoot.querySelector('input');
-        let keyword = input.value.trim();
-        this.result = [];
-        if (keyword == '') {
-          this.dropdownOpened = false;
-          this.loading = false;
-          return;
-        }
-        return fetch(this.request.call(this, keyword));
-      }
-
-      _generateRequest(keyword) {
-        return new Request(`/data/result.json?keyword=${keyword}`);
-      }
-
-      _response(response) {
-        return new Promise((resolved, reject) => {
-          resolved(response.json());
-        });
+      open() {
+        this.shadowRoot.querySelector('iron-dropdown').open();
       }
     }
 
     window.customElements.define(BooSearcher.is, BooSearcher);
+  })();
   </script>
 </dom-module>
